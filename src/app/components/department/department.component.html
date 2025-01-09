@@ -1,27 +1,6 @@
 <div class="card-container">
   <div class="card-header-wrapper">
     <h3 class="card-title">{{ customMsgService.translate("department") }}</h3>
-
-    <div class="card-buttons">
-      <kendo-buttongroup selection="single">
-        <button
-          kendoButton
-          [toggleable]="true"
-          [selected]="true"
-          (click)="onDepartmentChange(25)"
-        >
-          {{ customMsgService.translate("myDepartment") }}
-        </button>
-        <button
-          kendoButton
-          [toggleable]="true"
-          (click)="onDepartmentChange(100)"
-        >
-          {{ customMsgService.translate("allDepartments") }}
-        </button>
-      </kendo-buttongroup>
-    </div>
-    <span></span>
   </div>
 
   <div class="card-component">
