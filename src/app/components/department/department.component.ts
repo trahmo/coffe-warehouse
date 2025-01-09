@@ -1,4 +1,10 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from "@angular/core";
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  TemplateRef,
+  ViewChild,
+} from "@angular/core";
 import { DataBindingDirective } from "@progress/kendo-angular-grid";
 import { MessageService } from "@progress/kendo-angular-l10n";
 import { process } from "@progress/kendo-data-query";
@@ -18,7 +24,8 @@ import {
 } from "@progress/kendo-angular-notification";
 import { DepartmentService } from "./department.service";
 import { Subject, takeUntil } from "rxjs";
-import { Department } from './department';
+import { Department } from "./department";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 
 @Component({
   selector: "app-department",
@@ -34,11 +41,11 @@ export class DepartmentComponent implements OnInit, OnDestroy {
   public excelIcon: SVGIcon = fileExcelIcon;
   public pdfIcon: SVGIcon = filePdfIcon;
   public animation: boolean | DialogAnimation = {};
-  public editForm: Department = { 
+  public editForm: Department = {
     keyId: "",
     myName: "",
     myAge: 0,
-    isActive: true
+    isActive: true,
   };
   public isAddNewVisible = false;
   public isEditDialogVisible = false;
@@ -47,6 +54,7 @@ export class DepartmentComponent implements OnInit, OnDestroy {
   departmentToDelete: Department | null = null;
   currentDate: Date = new Date();
   public customMsgService: CustomMessagesService;
+  departmentForm: FormGroup;
 
   @ViewChild("notification", { read: TemplateRef })
   public notificationTemplate: TemplateRef<any> = {} as TemplateRef<any>;
@@ -60,12 +68,30 @@ export class DepartmentComponent implements OnInit, OnDestroy {
     hideAfter: 3000,
   };
   private subject = new Subject<void>();
+
   constructor(
     public msgService: MessageService,
-    private notificationService: NotificationService,
-    private _DepartmentService: DepartmentService
+    private fb: FormBuilder,
+    private _DepartmentService: DepartmentService,
+    private notificationService: NotificationService
   ) {
     this.customMsgService = this.msgService as CustomMessagesService;
+
+    this.departmentForm = this.fb.group({
+      myName: [
+        "",
+        [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(50),
+        ],
+      ],
+      myAge: [
+        "",
+        [Validators.required, Validators.min(1), Validators.max(100)],
+      ],
+      currentDate: ["", Validators.required],
+    });
   }
 
   public close(): void {
@@ -105,7 +131,6 @@ export class DepartmentComponent implements OnInit, OnDestroy {
   };
 
   public ngOnInit(): void {
-
     this.getDepartmentData();
   }
 
@@ -119,12 +144,9 @@ export class DepartmentComponent implements OnInit, OnDestroy {
     }
   }
 
-
-
   public onDepartmentChange(pageSize: number): void {
     const startIndex = 0;
     const endIndex = pageSize;
-
   }
 
   public onFilter(inputValue: string): void {
@@ -152,11 +174,9 @@ export class DepartmentComponent implements OnInit, OnDestroy {
     this.isAddNewVisible = false;
   }
 
-
-
   onEdit(department: Department) {
     console.log(department);
-    
+
     this.editForm = { ...department };
     this.isEditDialogVisible = true;
   }
@@ -167,21 +187,21 @@ export class DepartmentComponent implements OnInit, OnDestroy {
 
   onSave() {
     const index = this.gridView.findIndex(
-      (dept :Department) => dept.keyId === this.editForm.keyId
+      (dept: Department) => dept.keyId === this.editForm.keyId
     );
     this._DepartmentService
-        .updatedepartmentData(this.editForm, this.editForm.keyId)
-        .subscribe({
-          next: (Data) => {
-            if (index !== -1) {
-              this.gridView[index] = this.editForm;
-              this.gridView = [...this.gridView];
-              this.isEditDialogVisible = false;
-            }
-            this.showNotification("success");
-            this.closeEditDialog();
-          },
-        });
+      .updatedepartmentData(this.editForm, this.editForm.keyId)
+      .subscribe({
+        next: (Data) => {
+          if (index !== -1) {
+            this.gridView[index] = this.editForm;
+            this.gridView = [...this.gridView];
+            this.isEditDialogVisible = false;
+          }
+          this.showNotification("success");
+          this.closeEditDialog();
+        },
+      });
   }
 
   onDelete(department: Department) {
@@ -193,58 +213,85 @@ export class DepartmentComponent implements OnInit, OnDestroy {
   }
   confirmDelete() {
     if (this.departmentToDelete) {
-      this._DepartmentService.deletedepartmentData(this.departmentToDelete.keyId).subscribe({
-        next: (res: any) => {
-          this.gridView = this.gridView.filter(obj => obj.keyId !== this.departmentToDelete!.keyId);
-        },
-      });
+      this._DepartmentService
+        .deletedepartmentData(this.departmentToDelete.keyId)
+        .subscribe({
+          next: (res: any) => {
+            this.gridView = this.gridView.filter(
+              (obj) => obj.keyId !== this.departmentToDelete!.keyId
+            );
+          },
+        });
       this.isDeleteDialogVisible = false;
     }
   }
   // Add New Department
   addDepartment() {
-    this._DepartmentService.adddepartmentData(this.department).subscribe({
+    Object.keys(this.departmentForm.controls).forEach((controlName) => {
+      this.departmentForm.get(controlName)?.markAsTouched();
+    });
+
+    if (this.departmentForm.invalid) {
+      return;
+    }
+
+    const index = this.gridData.findIndex(
+      (dept) =>
+        dept.myName === this.department.myName ||
+        dept.myAge === this.department.myAge
+    );
+
+    if (index !== -1) {
+      this.showNotification("error");
+      return;
+    }
+
+    if (this.departmentForm.invalid) {
+      return;
+    }
+
+    const newDepartment: Department = {
+      keyId: "",
+      myName: this.departmentForm.value.myName,
+      myAge: this.departmentForm.value.myAge,
+      isActive: true,
+    };
+
+    this._DepartmentService.adddepartmentData(newDepartment).subscribe({
       next: (res: any) => {
-        console.log(res);
-        this.newDepartment = {
-          keyId: res.data.keyId,
-          myName: this.department.myName,
-          myAge: this.department.myAge,
-          isActive: true
-        };
-        this.gridView.push(this.newDepartment);
-        this.gridView = [...this.gridView];
-        
+        // Handle the response as needed
         this.showNotification("success");
-        this.isAddNewVisible = false;
+        this.closeAddNewDialogue();
+      },
+      error: (err) => {
+        // Handle error
+        this.showNotification("error");
       },
     });
-
   }
-// load Data 
-getDepartmentData(){
-  this._DepartmentService
-    .getdepartmentData()
-    .pipe(takeUntil(this.subject))
-    .subscribe({
-      next: (res: any) => {
-        this.gridView = res.data;
-
-      },
-      error: (err: any) => {
-        this.notificationService.show({
-          content: "Error loading data: " + err.message,
-          cssClass: "button-notification",
-          hideAfter: 3000,
-          animation: { type: "slide", duration: 400 },
-          position: { horizontal: "center", vertical: "top" },
-          type: { style: "error", icon: true },
-        });
-      },
-    });
-}
-ngOnDestroy(): void {
-  this.subject.next() ;
-  this.subject.complete() ;
-}
+  // load Data
+  getDepartmentData() {
+    this._DepartmentService
+      .getdepartmentData()
+      .pipe(takeUntil(this.subject))
+      .subscribe({
+        next: (res: any) => {
+          this.gridView = res.data;
+        },
+        error: (err: any) => {
+          this.notificationService.show({
+            content: "Error loading data: " + err.message,
+            cssClass: "button-notification",
+            hideAfter: 3000,
+            animation: { type: "slide", duration: 400 },
+            position: { horizontal: "center", vertical: "top" },
+            type: { style: "error", icon: true },
+          });
+        },
+      });
+  }
+  ngOnDestroy(): void {
+    this.subject.next();
+    this.subject.complete();
+  }
 }

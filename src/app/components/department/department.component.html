@@ -4,10 +4,19 @@
 
     <div class="card-buttons">
       <kendo-buttongroup selection="single">
-        <button kendoButton [toggleable]="true" [selected]="true" (click)="onDepartmentChange(25)">
+        <button
+          kendoButton
+          [toggleable]="true"
+          [selected]="true"
+          (click)="onDepartmentChange(25)"
+        >
           {{ customMsgService.translate("myDepartment") }}
         </button>
-        <button kendoButton [toggleable]="true" (click)="onDepartmentChange(100)">
+        <button
+          kendoButton
+          [toggleable]="true"
+          (click)="onDepartmentChange(100)"
+        >
           {{ customMsgService.translate("allDepartments") }}
         </button>
       </kendo-buttongroup>
@@ -16,66 +25,136 @@
   </div>
 
   <div class="card-component">
-    <kendo-grid [kendoGridBinding]="gridView" kendoGridSelectBy="id" [selectedKeys]="mySelection" [pageSize]="10"
-      [pageable]="true" [sortable]="true" [groupable]="true" [reorderable]="true" [resizable]="true" [height]="480"
-      [columnMenu]="{ filter: true }">
+    <kendo-grid
+      [kendoGridBinding]="gridView"
+      kendoGridSelectBy="id"
+      [selectedKeys]="mySelection"
+      [pageSize]="10"
+      [pageable]="true"
+      [sortable]="true"
+      [groupable]="true"
+      [reorderable]="true"
+      [resizable]="true"
+      [height]="480"
+      [columnMenu]="{ filter: true }"
+    >
       <ng-template kendoGridToolbarTemplate>
-        <kendo-textbox [placeholder]="customMsgService.translate('gridSearch')" kendoTextBox
-          (valueChange)="onFilter($event)">
+        <kendo-textbox
+          [placeholder]="customMsgService.translate('gridSearch')"
+          kendoTextBox
+          (valueChange)="onFilter($event)"
+        >
         </kendo-textbox>
         <kendo-grid-spacer> </kendo-grid-spacer>
 
-        <button kendoButton [size]="'medium'" [rounded]="'full'" [fillMode]="'outline'" [themeColor]="'success'"
-          (click)="onAddNew()">
+        <button
+          kendoButton
+          [size]="'medium'"
+          [rounded]="'full'"
+          [fillMode]="'outline'"
+          [themeColor]="'success'"
+          (click)="onAddNew()"
+        >
           Add New
         </button>
 
         <!-- Start Add New Department -->
-        <kendo-dialog title="Add New Department" [animation]="animation" *ngIf="isAddNewVisible"
-          (close)="closeAddNewDialogue()" [minWidth]="250" [width]="450">
-          <div class="form">
+        <kendo-dialog
+          title="Add New Department"
+          [animation]="animation"
+          *ngIf="isAddNewVisible"
+          (close)="closeAddNewDialogue()"
+          [minWidth]="250"
+          [width]="450"
+        >
+          <form [formGroup]="departmentForm" class="form">
             <table class="table table-borderless">
               <tbody>
+                <!-- Date Picker -->
                 <tr>
                   <td class="col-md-3 text-end">
-                    <kendo-label [for]="'datepicker'" text="Select a date:"></kendo-label>
+                    <kendo-label
+                      [for]="'datepicker'"
+                      text="Select a date:"
+                    ></kendo-label>
                   </td>
                   <td class="col-md-9">
-                    <kendo-datepicker #datepicker [size]="'medium'" [rounded]="'full'" [fillMode]="'outline'"
-                      [(value)]="currentDate" required></kendo-datepicker>
+                    <kendo-datepicker
+                      formControlName="datepicker"
+                      [size]="'medium'"
+                      [rounded]="'full'"
+                      [fillMode]="'outline'"
+                      style="width: 100%"
+                      [style.border]="
+                        departmentForm.get('datepicker')?.invalid &&
+                        departmentForm.get('datepicker')?.touched
+                          ? '1px solid red'
+                          : ''
+                      "
+                    ></kendo-datepicker>
                   </td>
                 </tr>
+
+                <!-- Department Name -->
                 <tr>
                   <td class="col-md-3 text-end">
-                    <kendo-label [for]="'departmentName'" text="Department Name:"></kendo-label>
+                    <kendo-label [for]="'myName'" text="My Name:"></kendo-label>
                   </td>
                   <td class="col-md-9">
-                    <input kendoTextBox [(ngModel)]="department.myName" name="departmentName" required minlength="3"
-                      maxlength="50" />
+                    <input
+                      kendoTextBox
+                      formControlName="myName"
+                      placeholder="Mushfique..."
+                      style="width: 100%"
+                      [style.border]="
+                        departmentForm.get('myName')?.invalid &&
+                        departmentForm.get('myName')?.touched
+                          ? '1px solid red'
+                          : ''
+                      "
+                    />
                   </td>
                 </tr>
+
+                <!-- Department Age -->
                 <tr>
                   <td class="col-md-3 text-end">
-                    <kendo-label [for]="'departmentCode'" text="Department Age:"></kendo-label>
+                    <kendo-label [for]="'myAge'" text="My Age:"></kendo-label>
                   </td>
                   <td class="col-md-9">
-                    <input kendoTextBox [(ngModel)]="department.myAge" name="departmentkeyId" required minlength="3"
-                      maxlength="50" />
+                    <input
+                      kendoTextBox
+                      formControlName="myAge"
+                      placeholder="(18)"
+                      style="width: 100%"
+                      [style.border]="
+                        departmentForm.get('myAge')?.invalid &&
+                        departmentForm.get('myAge')?.touched
+                          ? '1px solid red'
+                          : ''
+                      "
+                    />
                   </td>
                 </tr>
               </tbody>
             </table>
-          </div>
 
-          <kendo-dialog-actions>
-            <button kendoButton (click)="addDepartment()" type="submit">
-              Save
-            </button>
-            <button kendoButton type="button" (click)="closeAddNewDialogue()">
-              Cancel
-            </button>
-          </kendo-dialog-actions>
+            <!-- Dialog Actions -->
+            <kendo-dialog-actions>
+              <button
+                kendoButton
+                (click)="addDepartment()"
+                themeColor="primary"
+              >
+                Save
+              </button>
+              <button kendoButton type="button" (click)="closeAddNewDialogue()">
+                Cancel
+              </button>
+            </kendo-dialog-actions>
+          </form>
         </kendo-dialog>
+
         <!-- End Add New Department -->
         <button kendoGridExcelCommand type="button" [svgIcon]="excelIcon">
           {{ customMsgService.translate("exportExcel") }}
@@ -85,67 +164,137 @@
         </button>
       </ng-template>
 
-      <kendo-grid-checkbox-column [width]="45" [headerClass]="{ 'text-center': true }" [class]="{ 'text-center': true }"
-        [resizable]="false" [columnMenu]="false" [showSelectAll]="true">
+      <kendo-grid-checkbox-column
+        [width]="45"
+        [headerClass]="{ 'text-center': true }"
+        [class]="{ 'text-center': true }"
+        [resizable]="false"
+        [columnMenu]="false"
+        [showSelectAll]="true"
+      >
       </kendo-grid-checkbox-column>
 
-      <kendo-grid-column-group [title]="customMsgService.translate('department')" [columnMenu]="false">
-        <kendo-grid-column field="keyId" [title]="customMsgService.translate('keyId')" [width]="220"
-          [class]="{ 'text-center': true }" [resizable]="false">
+      <kendo-grid-column-group
+        [title]="customMsgService.translate('department')"
+        [columnMenu]="false"
+      >
+        <kendo-grid-column
+          field="keyId"
+          [title]="customMsgService.translate('keyId')"
+          [width]="220"
+          [class]="{ 'text-center': true }"
+          [resizable]="false"
+        >
         </kendo-grid-column>
-        <kendo-grid-column field="myName" [title]="customMsgService.translate('MyName')" [width]="100"
-          [class]="{ 'text-center': true }" [resizable]="false">
+        <kendo-grid-column
+          field="myName"
+          [title]="customMsgService.translate('MyName')"
+          [width]="100"
+          [class]="{ 'text-center': true }"
+          [resizable]="false"
+        >
         </kendo-grid-column>
-        <kendo-grid-column field="myAge" [title]="customMsgService.translate('MyAge')" [width]="100"
-          [class]="{ 'text-center': true }" [resizable]="false">
+        <kendo-grid-column
+          field="myAge"
+          [title]="customMsgService.translate('MyAge')"
+          [width]="100"
+          [class]="{ 'text-center': true }"
+          [resizable]="false"
+        >
         </kendo-grid-column>
       </kendo-grid-column-group>
 
-      <kendo-grid-column [width]="200" [title]="customMsgService.translate('actions')" [sortable]="false"
-        [filterable]="false" [resizable]="false" [class]="'text-center'">
+      <kendo-grid-column
+        [width]="200"
+        [title]="customMsgService.translate('actions')"
+        [sortable]="false"
+        [filterable]="false"
+        [resizable]="false"
+        [class]="'text-center'"
+      >
         <ng-template kendoGridCellTemplate let-dataItem>
-          <i class="bi bi-pencil" style="color: green" (click)="onEdit(dataItem)"></i>
+          <i
+            class="bi bi-pencil"
+            style="color: green"
+            (click)="onEdit(dataItem)"
+          ></i>
           &nbsp;
-          <i class="bi bi-trash" style="color: red" (click)="onDelete(dataItem)"></i>
+          <i
+            class="bi bi-trash"
+            style="color: red"
+            (click)="onDelete(dataItem)"
+          ></i>
         </ng-template>
       </kendo-grid-column>
 
-      <kendo-grid-pdf fileName="department.pdf" [repeatHeaders]="true"></kendo-grid-pdf>
+      <kendo-grid-pdf
+        fileName="department.pdf"
+        [repeatHeaders]="true"
+      ></kendo-grid-pdf>
       <kendo-grid-excel fileName="department.xlsx"></kendo-grid-excel>
     </kendo-grid>
   </div>
 </div>
 
-<kendo-dialog title="Edit Department" [animation]="animation" *ngIf="isEditDialogVisible" (close)="closeEditDialog()"
-  [minWidth]="250" [width]="450">
+<kendo-dialog
+  title="Edit Department"
+  [animation]="animation"
+  *ngIf="isEditDialogVisible"
+  (close)="closeEditDialog()"
+  [minWidth]="250"
+  [width]="450"
+>
   <div class="form">
     <table class="table table-borderless">
       <tbody>
         <tr>
           <td class="col-md-3 text-end">
-            <kendo-label [for]="'departmenMyName'" text="Department MyName:"></kendo-label>
+            <kendo-label
+              [for]="'departmenMyName'"
+              text="Department MyName:"
+            ></kendo-label>
           </td>
           <td class="col-md-9">
-            <input kendoTextBox id="departmenMyName" [(ngModel)]="editForm.myName" name="departmenMyName" required minlength="3"
-              maxlength="50"  />
+            <input
+              kendoTextBox
+              id="departmenMyName"
+              [(ngModel)]="editForm.myName"
+              name="departmenMyName"
+              required
+              minlength="3"
+              maxlength="50"
+            />
           </td>
         </tr>
         <tr>
           <td class="col-md-3 text-end">
-            <kendo-label [for]="'departmentMyAge'" text="Department My Age:"></kendo-label>
+            <kendo-label
+              [for]="'departmentMyAge'"
+              text="Department My Age:"
+            ></kendo-label>
           </td>
           <td class="col-md-9">
-            <input kendoTextBox [(ngModel)]="editForm.myAge" name="departmentMyAge" required minlength="3"
-              maxlength="50" />
+            <input
+              kendoTextBox
+              [(ngModel)]="editForm.myAge"
+              name="departmentMyAge"
+              required
+              minlength="3"
+              maxlength="50"
+            />
           </td>
         </tr>
-       
       </tbody>
     </table>
   </div>
 
   <kendo-dialog-actions>
-    <button kendoButton (click)="onSave()" type="submit" [disabled]="!editForm.myName || !editForm.myAge">
+    <button
+      kendoButton
+      (click)="onSave()"
+      type="submit"
+      [disabled]="!editForm.myName || !editForm.myAge"
+    >
       Save
     </button>
     <button kendoButton type="button" (click)="closeEditDialog()">
@@ -155,8 +304,14 @@
 </kendo-dialog>
 
 <!-- Start Popue For Delete -->
-<kendo-dialog title="Please confirm" [animation]="animation" *ngIf="isDeleteDialogVisible" (close)="closeDeleteDialog()"
-  [minWidth]="250" [width]="450">
+<kendo-dialog
+  title="Please confirm"
+  [animation]="animation"
+  *ngIf="isDeleteDialogVisible"
+  (close)="closeDeleteDialog()"
+  [minWidth]="250"
+  [width]="450"
+>
   <p style="margin: 30px; text-align: center">
     Are you sure you want to continue?
   </p>
@@ -172,9 +327,17 @@
   <div class="notification-box">
     <div class="text-content">
       <div>
-        <kendo-svgicon [icon]="svgIcon" size="large" style="margin-top: -5px"></kendo-svgicon>
-        <kendo-svgicon class="close" [icon]="closeIcon" (click)="close()"
-          style="height: 20px; width: 20px"></kendo-svgicon>
+        <kendo-svgicon
+          [icon]="svgIcon"
+          size="large"
+          style="margin-top: -5px"
+        ></kendo-svgicon>
+        <kendo-svgicon
+          class="close"
+          [icon]="closeIcon"
+          (click)="close()"
+          style="height: 20px; width: 20px"
+        ></kendo-svgicon>
       </div>
     </div>
   </div>
