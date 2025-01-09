@@ -170,8 +170,13 @@ export class DepartmentComponent implements OnInit, OnDestroy {
     this.isAddNewVisible = true;
   }
 
-  closeAddNewDialogue() {
+  public closeAddNewDialogue(): void {
     this.isAddNewVisible = false;
+    this.departmentForm.reset({
+      datepicker: this.currentDate,
+      departmentName: "",
+      departmentCode: "",
+    });
   }
 
   onEdit(department: Department) {
