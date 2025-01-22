@@ -15,6 +15,7 @@ import {
   infoCircleIcon,
   buildingBlocksIcon,
 } from "@progress/kendo-svg-icons";
+import { authGuard } from "./guard/auth.guard";
 
 @Component({
   selector: "app-root",
@@ -85,6 +86,7 @@ export class AppComponent implements OnInit, OnDestroy {
         text: this.customMsgService.translate("dashboard"),
         svgIcon: chartLineMarkersIcon,
         path: "/dashboard",
+       
         selected: false,
       },
       {

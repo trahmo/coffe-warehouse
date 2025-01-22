@@ -1,4 +1,4 @@
 export const environment = {
-  production: true , 
+  production: false , 
   baseUrl: 'https://rahmo.runasp.net/api/v1',
 };

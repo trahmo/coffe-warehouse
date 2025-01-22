@@ -12,7 +12,6 @@ export const enCustomMessages = {
   department: "Department",
   areYouSure: "Are you sure you want to delete this",
   deleteWarningMessage: "Delete Warning Message",
-  cancel: "Cancel",
   delete: "Delete",
   volume: "Volume",
   myTeam: "My Team",
@@ -49,9 +48,13 @@ export const enCustomMessages = {
   gridSearch: "Search in all columns...",
   exportExcel: "Export to Excel",
   exportPdf: "Export to PDF",
-  keyId: "keyId",
-  MyName: "MyName",
-  MyAge: "MyAge"
+  keyId: "key Id",
+  MyName: "My Name",
+  MyAge: "My Age",
+  AddNew:"Add New" , 
+  success : "Data Has Been Save Successfully !" , 
+  titleDelete: "Are you sure you want to continue?" 
+
 };
 
 // Kendo Angular Component Messages

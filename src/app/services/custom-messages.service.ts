@@ -2,19 +2,18 @@ import { EventEmitter, Injectable, Output } from '@angular/core';
 import { MessageService } from '@progress/kendo-angular-l10n';
 
 import { enComponentMessages, enCustomMessages } from '../messages/en-US';
-import { esComponentMessages, esCustomMessages } from '../messages/es';
-import { frComponentMessages, frCustomMessages } from '../messages/fr';
+import { esComponentMessages, esCustomMessages } from '../messages/ar';
 
 const componentMsgs: any = {
     ['en-US']: enComponentMessages,
-    ['es']: esComponentMessages,
-    ['fr']: frComponentMessages
+    ['ar']: esComponentMessages,
+   
 };
 
 const customMsgs: any = {
     ['en-US']: enCustomMessages,
-    ['es']: esCustomMessages,
-    ['fr']: frCustomMessages
+    ['ar']: esCustomMessages,
+    
 };
 
 @Injectable()

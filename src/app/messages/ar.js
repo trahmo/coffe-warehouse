@@ -42,7 +42,8 @@ export const esCustomMessages = {
     phone: 'Teléfono',
     gridSearch: 'Buscar en todas las columnas ...',
     exportExcel: 'Exportar a Excel',
-    exportPdf: 'Exportar a PDF'
+    exportPdf: 'Exportar a PDF' , 
+    department: "ادارة",
 };
 
 // Kendo Angular Component Messages

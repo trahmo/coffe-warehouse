@@ -52,6 +52,15 @@ export class HeaderComponent {
 
         this.customMsgService = this.messages as CustomMessagesService;
         this.customMsgService.language = this.selectedLanguage.localeId;
+
+        // if(localStorage.getItem('language') === 'ar'){
+        //     this.setLocale('ar');
+            
+        // this.rtl = !this.rtl;
+        // this.messages.notify(this.rtl);
+        // }else{
+           
+        // }
     }
 
     public setProfileImage(): void {
@@ -65,10 +74,14 @@ export class HeaderComponent {
         const themeEl: any = document.getElementById('theme');
         themeEl.href = theme.href;
     }
-
+    private rtl = false;
     public changeLanguage(item: any): void {
+        localStorage.setItem('language' , item.localeId)
         this.customMsgService.language = item.localeId;
         this.setLocale(item.localeId);
+
+        this.rtl = !this.rtl;
+        this.messages.notify(this.rtl);
     }
 
     public setLocale(locale: any): void {

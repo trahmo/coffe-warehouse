@@ -44,7 +44,9 @@ const drawerRoutes = [
   { path: "planning", component: PlanningComponent },
   { path: "profile", component: ProfileComponent },
   { path: "info", component: InfoComponent },
-  { path: "department", component: DepartmentComponent },
+  { path: "department", component: DepartmentComponent,}, 
+
+  //,canActivate: [authGuard]
 ];
 
 import "hammerjs";
@@ -53,6 +55,7 @@ import "@progress/kendo-angular-intl/locales/en/all";
 import "@progress/kendo-angular-intl/locales/es/all";
 import "@progress/kendo-angular-intl/locales/fr/all";
 import { DialogModule } from "@progress/kendo-angular-dialog";
+import { authGuard } from "./guard/auth.guard";
 
 @NgModule({
   declarations: [

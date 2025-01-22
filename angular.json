@@ -54,12 +54,14 @@
               }
             ],
             "styles": [
-              "src/styles/main.scss"
+               "src/styles/main.scss",
+              "./node_modules/bootstrap/dist/css/bootstrap.css",
+             
             ],
             "scripts": [],
             "extractLicenses": false,
             "sourceMap": true,
-            "optimization": false,
+            "optimization": true,
             "namedChunks": true
           },
           "configurations": {
@@ -72,7 +74,7 @@
               ],
               "optimization": true,
               "outputHashing": "all",
-              "sourceMap": false,
+              "sourceMap": true,
               "namedChunks": false,
               "extractLicenses": true,
               "budgets": [

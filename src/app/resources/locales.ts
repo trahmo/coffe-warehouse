@@ -4,11 +4,7 @@ export const locales = [
         localeId: 'en-US'
     },
     {
-        locale: 'French',
-        localeId: 'fr'
+        locale: 'Arabic',
+        localeId: 'ar'
     },
-    {
-        locale: 'Spanish',
-        localeId: 'es'
-    }
 ];

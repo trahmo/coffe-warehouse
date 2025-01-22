@@ -26,7 +26,6 @@ import { DepartmentService } from "./department.service";
 import { Subject, takeUntil } from "rxjs";
 import { Department } from "./department";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-
 @Component({
   selector: "app-department",
   templateUrl: "./department.component.html",
@@ -37,14 +36,17 @@ export class DepartmentComponent implements OnInit, OnDestroy {
   department: Department = {} as Department;
   newDepartment: Department = {} as Department;
   public gridData: Department[] = [];
-  public gridView: Department[] = [];
+  // public gridView: Department[] = [];
+  public gridView: any[] = [];
   public excelIcon: SVGIcon = fileExcelIcon;
   public pdfIcon: SVGIcon = filePdfIcon;
   public animation: boolean | DialogAnimation = {};
+  columns: any[] = [];
   public editForm: Department = {
     keyId: "",
     myName: "",
     myAge: 0,
+    
     isActive: true,
   };
   public isAddNewVisible = false;
@@ -55,6 +57,8 @@ export class DepartmentComponent implements OnInit, OnDestroy {
   currentDate: Date = new Date();
   public customMsgService: CustomMessagesService;
   departmentForm: FormGroup;
+  isAddMode :boolean = false ; 
+  isEditMode : boolean = false  ;
 
   @ViewChild("notification", { read: TemplateRef })
   public notificationTemplate: TemplateRef<any> = {} as TemplateRef<any>;
@@ -68,6 +72,8 @@ export class DepartmentComponent implements OnInit, OnDestroy {
     hideAfter: 3000,
   };
   private subject = new Subject<void>();
+
+
 
   constructor(
     public msgService: MessageService,
@@ -90,7 +96,7 @@ export class DepartmentComponent implements OnInit, OnDestroy {
         "",
         [Validators.required, Validators.min(1), Validators.max(100)],
       ],
-      currentDate: ["", Validators.required],
+
     });
   }
 
@@ -110,11 +116,10 @@ export class DepartmentComponent implements OnInit, OnDestroy {
       width: 400,
     });
   }
-
-  public showNotification(type: string): void {
+  public showNotification(type: string, msg: string): void {
     switch (type) {
       case "success":
-        this.state.content = "Your data has been saved.";
+        this.state.content = msg;
         this.state.type = { style: "success", icon: true };
         break;
       case "error":
@@ -132,7 +137,13 @@ export class DepartmentComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.getDepartmentData();
+    //this.gridView = this.gridData.slice(25, 50);
+    // this.gridView = this.gridData;
+
+
   }
+
+
 
   validateField(formValidator: any, field: string): void {
     if (field === "datePicker") {
@@ -155,23 +166,28 @@ export class DepartmentComponent implements OnInit, OnDestroy {
         logic: "or",
         filters: [
           {
-            field: "name",
+            field: this.getField,
             operator: "contains",
             value: inputValue,
           },
         ],
       },
-    }).data as Department[];
-
+    }).data;
     this.dataBinding ? (this.dataBinding.skip = 0) : null;
   }
 
+  public getField = (args: Department) => {
+    return `${args.myName}_${args.myAge}`;
+  };
+
   onAddNew() {
+    console.log("Abdelrahamn");
+    
     this.isAddNewVisible = true;
   }
 
   public closeAddNewDialogue(): void {
-    this.isAddNewVisible = false;
+    this.isEditMode = false;
     this.departmentForm.reset({
       datepicker: this.currentDate,
       departmentName: "",
@@ -190,24 +206,24 @@ export class DepartmentComponent implements OnInit, OnDestroy {
     this.isEditDialogVisible = false;
   }
 
-  onSave() {
-    const index = this.gridView.findIndex(
-      (dept: Department) => dept.keyId === this.editForm.keyId
-    );
-    this._DepartmentService
-      .updatedepartmentData(this.editForm, this.editForm.keyId)
-      .subscribe({
-        next: (Data) => {
-          if (index !== -1) {
-            this.gridView[index] = this.editForm;
-            this.gridView = [...this.gridView];
-            this.isEditDialogVisible = false;
-          }
-          this.showNotification("success");
-          this.closeEditDialog();
-        },
-      });
-  }
+  // onSave() {
+  //   const index = this.gridView.findIndex(
+  //     (dept: Department) => dept.keyId === this.editForm.keyId
+  //   );
+  //   this._DepartmentService
+  //     .updatedepartmentData(this.editForm, this.editForm.keyId)
+  //     .subscribe({
+  //       next: (Data) => {
+  //         if (index !== -1) {
+  //           this.gridView[index] = this.editForm;
+  //           this.gridView = [...this.gridView];
+  //           this.isEditDialogVisible = false;
+  //         }
+  //         this.showNotification("success", this.customMsgService.translate("success"));
+  //         this.closeEditDialog();
+  //       },
+  //     });
+  // }
 
   onDelete(department: Department) {
     this.isDeleteDialogVisible = true;
@@ -222,6 +238,7 @@ export class DepartmentComponent implements OnInit, OnDestroy {
         .deletedepartmentData(this.departmentToDelete.keyId)
         .subscribe({
           next: (res: any) => {
+            this.showNotification("success", this.customMsgService.translate("success"));
             this.gridView = this.gridView.filter(
               (obj) => obj.keyId !== this.departmentToDelete!.keyId
             );
@@ -231,49 +248,98 @@ export class DepartmentComponent implements OnInit, OnDestroy {
     }
   }
   // Add New Department
-  addDepartment() {
-    Object.keys(this.departmentForm.controls).forEach((controlName) => {
-      this.departmentForm.get(controlName)?.markAsTouched();
-    });
-
-    if (this.departmentForm.invalid) {
-      return;
-    }
-
-    const index = this.gridData.findIndex(
-      (dept) =>
-        dept.myName === this.department.myName ||
-        dept.myAge === this.department.myAge
-    );
-
-    if (index !== -1) {
-      this.showNotification("error");
-      return;
-    }
-
-    if (this.departmentForm.invalid) {
-      return;
-    }
-
-    const newDepartment: Department = {
-      keyId: "",
-      myName: this.departmentForm.value.myName,
-      myAge: this.departmentForm.value.myAge,
-      isActive: true,
-    };
-
-    this._DepartmentService.adddepartmentData(newDepartment).subscribe({
-      next: (res: any) => {
-        // Handle the response as needed
-        this.showNotification("success");
-        this.closeAddNewDialogue();
-      },
-      error: (err) => {
-        // Handle error
-        this.showNotification("error");
-      },
-    });
+  // Add New Department
+  currentKeyId : string  = ''; 
+  openAddMode() {
+    this.isEditMode = true;
+    this.currentKeyId = '';
+    this.departmentForm.reset();
   }
+  openEditMode(item: Department) {
+    this.isEditMode = true;
+    this.currentKeyId = item.keyId;
+  
+    this.departmentForm.patchValue(item);
+  }
+  submitForm(departmentForm: FormGroup) {
+    if (this.isEditMode && this.currentKeyId) {
+      const index = this.gridView.findIndex(
+        (dept: Department) => dept.keyId === this.currentKeyId
+      );
+      this._DepartmentService
+        .updatedepartmentData(departmentForm.value, this.currentKeyId)
+        .subscribe({
+          next: (Data) => {
+            if (index !== -1) {
+              this.gridView[index] = departmentForm.value;
+              this.gridView = [...this.gridView];
+              this.isEditDialogVisible = false;
+            }
+            this.showNotification("success", this.customMsgService.translate("success"));
+            this.isEditMode = false
+          },
+        });
+    } else {
+      
+      const newDepartment: Department = { } as Department ;
+          this._DepartmentService.adddepartmentData(newDepartment).subscribe({
+            next: (res: any) => {
+              this._DepartmentService.showRow(res.data.keyId).subscribe({
+                next:(data :any)=>{
+                  console.log("Data Of Row الجديد" ,  data);
+                  console.log("Data Of Row الجديد" ,  data.data);
+                  this.newDepartment = data.data ; 
+                }
+              })
+              console.log(res);
+              
+               
+              // newDepartment.created_at = res.data.created_at  ; 
+              this.showNotification("success", this.customMsgService.translate("success"));
+             
+              this.gridView.push(newDepartment);
+              this.gridView = [...this.gridView];
+              this.isEditMode = false ; 
+            },
+            error: (err) => {
+              // Handle error
+              this.showNotification("error", this.customMsgService.translate("error"));
+            },
+          });
+    }
+  }
+
+
+  // addDepartment() {
+  //   Object.keys(this.departmentForm.controls).forEach((controlName) => {
+  //     this.departmentForm.get(controlName)?.markAsTouched();
+  //   });
+
+  //   if (this.departmentForm.invalid) {
+  //     return;
+  //   }
+
+  //   const newDepartment: Department = {
+  //     keyId: "",
+  //     myName: this.departmentForm.value.myName,
+  //     myAge: this.departmentForm.value.myAge,
+  //     isActive: true,
+  //   };
+
+  //   this._DepartmentService.adddepartmentData(newDepartment).subscribe({
+  //     next: (res: any) => {
+  //       newDepartment.keyId = res.data.keyId
+  //       this.showNotification("success", this.customMsgService.translate("success"));
+  //       this.closeAddNewDialogue();
+  //       this.gridView.push(newDepartment);
+  //       this.gridView = [...this.gridView];
+  //     },
+  //     error: (err) => {
+  //       // Handle error
+  //       this.showNotification("error", this.customMsgService.translate("error"));
+  //     },
+  //   });
+  // }
   // load Data
   getDepartmentData() {
     this._DepartmentService
@@ -281,7 +347,21 @@ export class DepartmentComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.subject))
       .subscribe({
         next: (res: any) => {
-          this.gridView = res.data;
+          console.log(res);
+          
+          if (res.data.length > 0) {
+            const sampleRow = res.data[0];
+            const columnsToRemove = ['keyId','nameEn','nameAr','updatedAt','updatedBy'];
+            
+            this.columns = Object.keys(sampleRow)
+              .filter(key => !columnsToRemove.includes(key))
+              .map(key => ({
+                field: key,
+                title: (key),
+              }));
+            this.gridView = res.data
+            this.gridData = this.gridView ; 
+          }
         },
         error: (err: any) => {
           this.notificationService.show({
